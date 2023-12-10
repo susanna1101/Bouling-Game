@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bouncing Ballz</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bouncingBallCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('bouncingBallCanvas');
+        const context = canvas.getContext('2d');
+        let balls = [];
+
+        function spawnBall(event) {
+            const ball = {
+                x: event.clientX - canvas.offsetLeft,
+                y: event.clientY - canvas.offsetTop,
+                radius: 20,
+                dx: Math.random() * 200 - 100, // Random horizontal velocity
+                dy: Math.random() * -300, // Random initial upward velocity
+                gravity: 1000,
+                dampening: 0.8
+            };
+            balls.push(ball);
+        }
+
+        function drawBall(ball) {
+            context.beginPath();
+            context.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            context.fillStyle = '#0095DD';
+            context.fill();
+            context.closePath();
+        }
+
+        function updateBall(ball, deltaTime) {
+            ball.x += ball.dx * deltaTime;
+            ball.y += ball.dy * deltaTime;
+
+            // Apply gravity
+            ball.dy += ball.gravity * deltaTime;
+
+            // Bounce off the walls
+            if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
+                ball.dx = -ball.dx * ball.dampening;
+            }
+
+            // Bounce off the floor
+            if (ball.y + ball.radius > canvas.height) {
+                ball.y = canvas.height - ball.radius;
+                ball.dy = -ball.dy * ball.dampening;
+            }
+        }
+
+        function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            balls.forEach(drawBall);
+        }
+
+        function update(deltaTime) {
+            balls.forEach(ball => updateBall(ball, deltaTime));
+        }
+
+        function animate(currentTime) {
+            const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
+            lastTime = currentTime;
+
+            update(deltaTime);
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        let lastTime = 0;
+        canvas.addEventListener('click', spawnBall);
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
